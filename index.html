@@ -787,26 +787,30 @@ async function saveNtfy() {
   const topic = document.getElementById('ntfy-topic').value.trim();
   if (!topic) { showToast('Enter a topic name first'); return; }
   store.set('ntfy_topic', topic);
-  showToast('Sending test — check your ntfy app...');
-  await sendNtfy(topic, 'For Ira ♡', 'Notifications are working! You\'ll receive your nudges here.', 'high');
-  showToast('Test sent! Did you get it in ntfy? ♡');
-  loadSettings();
+  showToast('Sending test notification...');
+  const ok = await sendNtfy(topic, 'For Ira ♡', 'Notifications are working! You\'ll receive your nudges here.', 'high');
+  if (ok) {
+    showToast('Test sent! Check your ntfy app ♡');
+    loadSettings();
+  } else {
+    showToast('Could not send — check topic name & ntfy app');
+  }
 }
 
 async function sendNtfy(topic, title, message, priority = 'default') {
   try {
-    await fetch(`https://ntfy.sh/${topic}`, {
+    const res = await fetch('https://calm-paper-6804.andreyrouk.workers.dev/', {
       method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Title': title,
-        'Priority': priority === 'urgent' ? '5' : priority === 'high' ? '4' : '3',
-        'Content-Type': 'text/plain',
-      },
-      body: message,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic,
+        title,
+        message,
+        priority: priority === 'urgent' ? '5' : priority === 'high' ? '4' : '3',
+      }),
     });
-    // no-cors means we can't read the response — assume success if no exception
-    return true;
+    const data = await res.json();
+    return data.ok;
   } catch { return false; }
 }
 
