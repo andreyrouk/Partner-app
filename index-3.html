@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#1a0a2e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>For Ira ♡</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0e0818;
+    --surface: #1a1028;
+    --surface2: #231538;
+    --accent: #c084fc;
+    --accent2: #f0abfc;
+    --gold: #fbbf24;
+    --text: #f3e8ff;
+    --muted: #a78bca;
+    --border: rgba(192,132,252,0.15);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -20%;
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(circle, rgba(192,132,252,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -20%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(240,171,252,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    background: rgba(26,16,40,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 12px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+  }
+  nav button.active { color: var(--accent); }
+  nav button svg { width: 20px; height: 20px; }
+
+  /* Pages */
+  .page { display: none; padding: 24px 20px 90px; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  /* Header */
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .page-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .page-header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Home page nudge card */
+  .nudge-card {
+    background: linear-gradient(135deg, #2d1657 0%, #1a0a2e 100%);
+    border: 1px solid rgba(192,132,252,0.3);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .nudge-card::before {
+    content: '♡';
+    position: absolute;
+    top: -10px; right: 16px;
+    font-size: 80px;
+    color: rgba(192,132,252,0.06);
+    line-height: 1;
+  }
+  .nudge-card .nudge-type {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .nudge-card .nudge-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 16px;
+    min-height: 66px;
+  }
+  .nudge-card .nudge-text.loading {
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 100px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0e0818;
+    font-weight: 500;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost {
+    background: rgba(192,132,252,0.1);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: rgba(192,132,252,0.2); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Upcoming dates */
+  .date-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .date-item:last-child { border-bottom: none; }
+  .date-badge {
+    min-width: 48px;
+    height: 48px;
+    background: var(--surface2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .date-badge .month {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .date-badge .day {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text);
+  }
+  .date-info { flex: 1; }
+  .date-info .name { font-size: 15px; margin-bottom: 2px; }
+  .date-info .countdown {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .date-info .countdown.soon { color: var(--gold); }
+
+  /* Form inputs */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: rgba(192,132,252,0.5);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: var(--surface2); }
+
+  /* Notes list */
+  .note-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .note-item .note-tag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .note-item .note-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .note-item .note-delete {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    opacity: 0.5;
+  }
+  .note-item .note-delete:hover { opacity: 1; color: #f87171; }
+
+  /* Setup banner */
+  .setup-banner {
+    background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(192,132,252,0.1) 100%);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .setup-banner p { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Section divider */
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    font-weight: 500;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Ntfy setup section */
+  .ntfy-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+  }
+  .dot.off { background: #6b7280; }
+
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(192,132,252,0.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .page.active > * {
+    animation: fadeUp 0.35s ease both;
+  }
+  .page.active > *:nth-child(2) { animation-delay: 0.05s; }
+  .page.active > *:nth-child(3) { animation-delay: 0.1s; }
+  .page.active > *:nth-child(4) { animation-delay: 0.15s; }
+</style>
+</head>
+<body>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="page-header">
+    <h1>For Ira</h1>
+    <p id="home-subtitle">Your daily reminder to show up for her</p>
+  </div>
+
+  <div id="setup-banner-wrap"></div>
+
+  <div class="nudge-card">
+    <div class="nudge-type" id="nudge-type">Today's nudge</div>
+    <div class="nudge-text loading" id="nudge-text">Tap below to get a personalized suggestion...</div>
+    <button class="btn btn-primary" id="btn-nudge" onclick="generateNudge()">
+      <span id="nudge-btn-text">Generate nudge</span>
+    </button>
+  </div>
+
+  <div class="section-title">Coming up</div>
+  <div class="card" id="upcoming-dates-home">
+    <p style="color:var(--muted);font-size:14px;">Add important dates in the Dates tab.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-notes">0</div>
+      <div class="stat-label">Notes about Ira</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-dates">0</div>
+      <div class="stat-label">Important dates</div>
+    </div>
+  </div>
+</div>
+
+<!-- DATES PAGE -->
+<div class="page" id="page-dates">
+  <div class="page-header">
+    <h1>Important dates</h1>
+    <p>Reminders will fire a week before & day of</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Add a date</div>
+    <div class="field">
+      <label>What is it?</label>
+      <input type="text" id="date-name" placeholder="e.g. Anniversary, Ira's birthday"/>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="date-value"/>
+    </div>
+    <div class="field">
+      <label>Repeats yearly?</label>
+      <select id="date-repeat">
+        <option value="yes">Yes, every year</option>
+        <option value="no">No, one time only</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="addDate()">Add date</button>
+  </div>
+
+  <div class="section-title">Saved dates</div>
+  <div id="dates-list">
+    <p style="color:var(--muted);font-size:14px;">No dates yet.</p>
+  </div>
+</div>
+
+<!-- NOTES PAGE -->
+<div class="page" id="page-notes">
+  <div class="page-header">
+    <h1>About Ira</h1>
+    <p>Things to remember — the more you add, the better the nudges</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Add a note</div>
+    <div class="field">
+      <label>Category</label>
+      <select id="note-category">
+        <option value="loves">She loves</option>
+        <option value="dislikes">She dislikes</option>
+        <option value="wants">She wants to try</option>
+        <option value="remember">Important to remember</option>
+        <option value="love-language">Love language</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <textarea id="note-text" placeholder="e.g. Loves when I bring her coffee in the morning..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="addNote()">Save note</button>
+  </div>
+
+  <div class="section-title">Your notes</div>
+  <div id="notes-list">
+    <p style="color:var(--muted);font-size:14px;">No notes yet. Add things Ira loves, wants, or things you want to remember.</p>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <h1>Settings</h1>
+    <p>Notifications & preferences</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Claude API Key</div>
+    <p class="card p" style="margin-bottom:12px;font-size:13px;color:var(--muted);">Required to generate personalized nudges. Get yours free at console.anthropic.com</p>
+    <div class="field">
+      <input type="password" id="api-key-input" placeholder="sk-ant-..."/>
+    </div>
+    <button class="btn btn-primary" onclick="saveApiKey()">Save key</button>
+    <span id="api-key-status" style="font-size:12px;color:var(--muted);margin-left:12px;"></span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Push notifications via ntfy</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+      Install the <strong style="color:var(--text);">ntfy app</strong> on your phone, then enter a unique topic name below (like <em>andrii-ira-nudges</em>). Subscribe to that topic in the ntfy app and you'll receive all reminders there.
+    </p>
+    <div class="field">
+      <label>Your ntfy topic</label>
+      <input type="text" id="ntfy-topic" placeholder="e.g. andrii-ira-nudges"/>
+    </div>
+    <button class="btn btn-primary" onclick="saveNtfy()">Save & test</button>
+    <div style="margin-top:14px;" id="ntfy-status-wrap">
+      <div class="ntfy-status">
+        <div class="dot off" id="ntfy-dot"></div>
+        <span id="ntfy-status-text">Not configured</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Nudge schedule</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+      Nudges fire 2–3 times a week at varied times. The scheduler runs whenever you open the app — keep it on your home screen so it stays active.
+    </p>
+    <div class="ntfy-status" id="scheduler-status">
+      <div class="dot off" id="scheduler-dot"></div>
+      <span id="scheduler-text">Scheduler inactive</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Data</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">All data is stored locally on your phone only — nothing is sent to any server except Claude API calls for nudge generation.</p>
+    <button class="btn btn-ghost" onclick="exportData()">Export all data</button>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <button class="active" onclick="showPage('home', this)" id="nav-home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    Home
+  </button>
+  <button onclick="showPage('dates', this)" id="nav-dates">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Dates
+  </button>
+  <button onclick="showPage('notes', this)" id="nav-notes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Notes
+  </button>
+  <button onclick="showPage('settings', this)" id="nav-settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Storage helpers ──────────────────────────
+const store = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+
+// ── Page navigation ──────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'home') refreshHome();
+  if (name === 'dates') renderDates();
+  if (name === 'notes') renderNotes();
+  if (name === 'settings') loadSettings();
+}
+
+// ── Toast ────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── DATES ─────────────────────────────────────
+function getDates() { return store.get('sc_dates') || []; }
+function saveDates(d) { store.set('sc_dates', d); }
+
+function addDate() {
+  const name = document.getElementById('date-name').value.trim();
+  const val  = document.getElementById('date-value').value;
+  const rep  = document.getElementById('date-repeat').value;
+  if (!name || !val) { showToast('Please fill in both fields'); return; }
+  const dates = getDates();
+  dates.push({ id: Date.now(), name, date: val, repeat: rep });
+  saveDates(dates);
+  document.getElementById('date-name').value = '';
+  document.getElementById('date-value').value = '';
+  renderDates();
+  refreshHome();
+  showToast('Date saved ♡');
+}
+
+function deleteDate(id) {
+  saveDates(getDates().filter(d => d.id !== id));
+  renderDates();
+  refreshHome();
+}
+
+function getDaysUntil(dateStr, repeat) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  let d = new Date(dateStr + 'T00:00:00');
+  if (repeat === 'yes') {
+    d.setFullYear(now.getFullYear());
+    if (d < now) d.setFullYear(now.getFullYear() + 1);
+  }
+  return Math.round((d - now) / 86400000);
+}
+
+function renderDates() {
+  const dates = getDates();
+  const el = document.getElementById('dates-list');
+  if (!dates.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;">No dates yet.</p>';
+    return;
+  }
+  const sorted = [...dates].sort((a,b) => getDaysUntil(a.date, a.repeat) - getDaysUntil(b.date, b.repeat));
+  el.innerHTML = sorted.map(d => {
+    const days = getDaysUntil(d.date, d.repeat);
+    const dt = new Date(d.date + 'T00:00:00');
+    const month = dt.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const day = dt.getDate();
+    const soon = days <= 7;
+    const countdown = days === 0 ? '🎉 Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+    return `
+      <div class="date-item">
+        <div class="date-badge">
+          <span class="month">${month}</span>
+          <span class="day">${day}</span>
+        </div>
+        <div class="date-info">
+          <div class="name">${d.name}</div>
+          <div class="countdown ${soon ? 'soon' : ''}">${countdown} ${d.repeat === 'yes' ? '· yearly' : ''}</div>
+        </div>
+        <button onclick="deleteDate(${d.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;opacity:0.5;">×</button>
+      </div>`;
+  }).join('');
+}
+
+// ── NOTES ─────────────────────────────────────
+function getNotes() { return store.get('sc_notes') || []; }
+function saveNotes(n) { store.set('sc_notes', n); }
+
+const categoryLabels = {
+  loves: 'She loves',
+  dislikes: 'She dislikes',
+  wants: 'Wants to try',
+  remember: 'Remember',
+  'love-language': 'Love language',
+  other: 'Note',
+};
+
+function addNote() {
+  const cat  = document.getElementById('note-category').value;
+  const text = document.getElementById('note-text').value.trim();
+  if (!text) { showToast('Write something first'); return; }
+  const notes = getNotes();
+  notes.push({ id: Date.now(), category: cat, text });
+  saveNotes(notes);
+  document.getElementById('note-text').value = '';
+  renderNotes();
+  updateStats();
+  showToast('Note saved ♡');
+}
+
+function deleteNote(id) {
+  saveNotes(getNotes().filter(n => n.id !== id));
+  renderNotes();
+  updateStats();
+}
+
+function renderNotes() {
+  const notes = getNotes();
+  const el = document.getElementById('notes-list');
+  if (!notes.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;">No notes yet. Add things Ira loves, wants, or things you want to remember.</p>';
+    return;
+  }
+  el.innerHTML = [...notes].reverse().map(n => `
+    <div class="note-item">
+      <div class="note-tag">${categoryLabels[n.category] || 'Note'}</div>
+      <div class="note-text">${n.text}</div>
+      <button class="note-delete" onclick="deleteNote(${n.id})">×</button>
+    </div>`).join('');
+}
+
+// ── SETTINGS ──────────────────────────────────
+function loadSettings() {
+  const key = store.get('claude_api_key') || '';
+  document.getElementById('api-key-input').value = key ? '••••••••••••••••' : '';
+  document.getElementById('api-key-status').textContent = key ? '✓ Key saved' : '';
+
+  const topic = store.get('ntfy_topic') || '';
+  document.getElementById('ntfy-topic').value = topic;
+
+  const ntfyDot  = document.getElementById('ntfy-dot');
+  const ntfyText = document.getElementById('ntfy-status-text');
+  if (topic) {
+    ntfyDot.classList.remove('off');
+    ntfyText.textContent = 'Configured: ' + topic;
+  } else {
+    ntfyDot.classList.add('off');
+    ntfyText.textContent = 'Not configured';
+  }
+
+  const schedDot  = document.getElementById('scheduler-dot');
+  const schedText = document.getElementById('scheduler-text');
+  const lastSched = store.get('last_schedule_check');
+  if (lastSched) {
+    schedDot.classList.remove('off');
+    schedText.textContent = 'Active · last checked ' + new Date(lastSched).toLocaleDateString();
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val || val.startsWith('•')) { showToast('Enter your API key first'); return; }
+  store.set('claude_api_key', val);
+  document.getElementById('api-key-status').textContent = '✓ Key saved';
+  document.getElementById('api-key-input').value = '••••••••••••••••';
+  showToast('API key saved');
+}
+
+async function saveNtfy() {
+  const topic = document.getElementById('ntfy-topic').value.trim();
+  if (!topic) { showToast('Enter a topic name first'); return; }
+  store.set('ntfy_topic', topic);
+  showToast('Sending test — check your ntfy app...');
+  await sendNtfy(topic, 'For Ira ♡', 'Notifications are working! You\'ll receive your nudges here.', 'high');
+  showToast('Test sent! Did you get it in ntfy? ♡');
+  loadSettings();
+}
+
+async function sendNtfy(topic, title, message, priority = 'default') {
+  try {
+    await fetch(`https://ntfy.sh/${topic}`, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Title': title,
+        'Priority': priority === 'urgent' ? '5' : priority === 'high' ? '4' : '3',
+        'Content-Type': 'text/plain',
+      },
+      body: message,
+    });
+    // no-cors means we can't read the response — assume success if no exception
+    return true;
+  } catch { return false; }
+}
+
+function exportData() {
+  const data = {
+    dates: getDates(),
+    notes: getNotes(),
+    exported: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'for-ira-data.json';
+  a.click();
+}
+
+// ── NUDGE GENERATION ──────────────────────────
+async function generateNudge() {
+  const apiKey = store.get('claude_api_key');
+  if (!apiKey) {
+    showToast('Add your Claude API key in Settings first');
+    showPage('settings', document.getElementById('nav-settings'));
+    return;
+  }
+
+  const btn = document.getElementById('btn-nudge');
+  const textEl = document.getElementById('nudge-text');
+  const typeEl = document.getElementById('nudge-type');
+
+  btn.disabled = true;
+  document.getElementById('nudge-btn-text').innerHTML = '<span class="spinner"></span>';
+  textEl.classList.add('loading');
+  textEl.textContent = 'Thinking of something just for you...';
+
+  const notes = getNotes();
+  const dates = getDates();
+
+  const notesContext = notes.length
+    ? notes.map(n => `${categoryLabels[n.category]}: ${n.text}`).join('\n')
+    : 'No notes yet.';
+
+  const upcomingDates = dates
+    .filter(d => getDaysUntil(d.date, d.repeat) <= 14)
+    .map(d => `${d.name} is in ${getDaysUntil(d.date, d.repeat)} days`)
+    .join(', ') || 'None in the next 2 weeks';
+
+  const nudgeTypes = ['romantic gesture', 'thoughtful compliment to send her', 'small act of service', 'playful surprise', 'quality time idea'];
+  const type = nudgeTypes[Math.floor(Math.random() * nudgeTypes.length)];
+
+  const prompt = `You are a warm, thoughtful assistant helping a husband named Andrii show up for his wife Ira.
+
+Here's what Andrii has noted about Ira:
+${notesContext}
+
+Upcoming important dates: ${upcomingDates}
+
+Generate a single, specific, actionable ${type} for Andrii to do for Ira today. 
+
+Rules:
+- Be specific and personal based on the notes (if any)
+- Keep it to 1-3 sentences max
+- Warm and genuine, never cheesy or generic
+- Mix of sweet, practical, and playful tones
+- If there's an upcoming date, tie it in naturally if relevant
+- Don't start with "Andrii" or explain yourself — just give the suggestion directly
+
+Respond with only the suggestion, nothing else.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'Something went wrong — try again.';
+
+    textEl.classList.remove('loading');
+    textEl.textContent = text;
+    typeEl.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+    store.set('last_nudge', { text, type, date: new Date().toISOString() });
+    btn.disabled = false;
+    document.getElementById('nudge-btn-text').textContent = 'Generate another';
+
+  } catch (e) {
+    textEl.textContent = 'Could not connect — check your API key in Settings.';
+    textEl.classList.remove('loading');
+    btn.disabled = false;
+    document.getElementById('nudge-btn-text').textContent = 'Try again';
+  }
+}
+
+// ── HOME REFRESH ──────────────────────────────
+function updateStats() {
+  document.getElementById('stat-notes').textContent = getNotes().length;
+  document.getElementById('stat-dates').textContent = getDates().length;
+}
+
+function refreshHome() {
+  updateStats();
+
+  // Upcoming dates preview
+  const dates = getDates();
+  const el = document.getElementById('upcoming-dates-home');
+  if (!dates.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;">Add important dates in the Dates tab.</p>';
+    return;
+  }
+  const sorted = [...dates]
+    .sort((a,b) => getDaysUntil(a.date, a.repeat) - getDaysUntil(b.date, b.repeat))
+    .slice(0, 3);
+
+  el.innerHTML = sorted.map(d => {
+    const days = getDaysUntil(d.date, d.repeat);
+    const dt = new Date(d.date + 'T00:00:00');
+    const month = dt.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const day = dt.getDate();
+    const soon = days <= 7;
+    const countdown = days === 0 ? '🎉 Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+    return `
+      <div class="date-item">
+        <div class="date-badge">
+          <span class="month">${month}</span>
+          <span class="day">${day}</span>
+        </div>
+        <div class="date-info">
+          <div class="name">${d.name}</div>
+          <div class="countdown ${soon ? 'soon' : ''}">${countdown}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Setup banner
+  const apiKey = store.get('claude_api_key');
+  const ntfyTopic = store.get('ntfy_topic');
+  const bannerWrap = document.getElementById('setup-banner-wrap');
+  if (!apiKey || !ntfyTopic) {
+    const missing = [];
+    if (!apiKey) missing.push('Claude API key');
+    if (!ntfyTopic) missing.push('ntfy topic');
+    bannerWrap.innerHTML = `
+      <div class="setup-banner">
+        <span style="font-size:20px;">⚙️</span>
+        <p>Finish setup to enable nudges: add your <strong>${missing.join(' and ')}</strong> in Settings.</p>
+      </div>`;
+  } else {
+    bannerWrap.innerHTML = '';
+  }
+
+  // Restore last nudge if exists
+  const lastNudge = store.get('last_nudge');
+  if (lastNudge && document.getElementById('nudge-text').classList.contains('loading')) {
+    document.getElementById('nudge-text').textContent = lastNudge.text;
+    document.getElementById('nudge-text').classList.remove('loading');
+    document.getElementById('nudge-type').textContent = lastNudge.type;
+    document.getElementById('nudge-btn-text').textContent = 'Generate another';
+  }
+}
+
+// ── SCHEDULER ─────────────────────────────────
+// Runs on app open — checks if a nudge should fire today
+async function runScheduler() {
+  const topic  = store.get('ntfy_topic');
+  const apiKey = store.get('claude_api_key');
+  if (!topic || !apiKey) return;
+
+  const now       = Date.now();
+  const lastFired = store.get('last_nudge_sent') || 0;
+  const daysSince = (now - lastFired) / 86400000;
+
+  // Fire 2-3x/week — roughly every 2-3 days with some randomness
+  const threshold = 2 + Math.random(); // 2.0–3.0 days
+  if (daysSince < threshold) return;
+
+  store.set('last_schedule_check', now);
+
+  // Random hour between 8am–8pm
+  const hour = new Date().getHours();
+  if (hour < 8 || hour > 20) return;
+
+  // Generate and send
+  const notes = getNotes();
+  const notesContext = notes.length
+    ? notes.map(n => `${categoryLabels[n.category]}: ${n.text}`).join('\n')
+    : 'No notes yet.';
+
+  const dates = getDates();
+  const upcomingDates = dates
+    .filter(d => getDaysUntil(d.date, d.repeat) <= 7)
+    .map(d => `${d.name} is in ${getDaysUntil(d.date, d.repeat)} days`)
+    .join(', ') || 'None this week';
+
+  const types = ['a small romantic gesture', 'a thoughtful compliment to send her', 'a tiny act of kindness', 'a playful surprise'];
+  const type  = types[Math.floor(Math.random() * types.length)];
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `You are helping Andrii show up for his wife Ira.
+
+Notes about Ira:
+${notesContext}
+
+Upcoming dates this week: ${upcomingDates}
+
+Give Andrii one specific, actionable idea for ${type} he can do today. 2 sentences max. Warm, genuine, never cheesy. Just the suggestion — no preamble.`
+        }],
+      }),
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text;
+    if (text) {
+      await sendNtfy(topic, 'For Ira ♡', text, 'default');
+      store.set('last_nudge_sent', now);
+    }
+  } catch { /* silent fail */ }
+}
+
+// ── DATE REMINDERS ────────────────────────────
+async function checkDateReminders() {
+  const topic = store.get('ntfy_topic');
+  if (!topic) return;
+
+  const dates = getDates();
+  const lastDateCheck = store.get('last_date_check') || 0;
+  const now = Date.now();
+
+  // Only check once per day
+  if (now - lastDateCheck < 86400000) return;
+  store.set('last_date_check', now);
+
+  for (const d of dates) {
+    const days = getDaysUntil(d.date, d.repeat);
+    if (days === 7) {
+      await sendNtfy(topic, `${d.name} is in one week ♡`, `Just a heads up — ${d.name} is coming up in 7 days. Start thinking about what you'd like to do!`, 'high');
+    } else if (days === 1) {
+      await sendNtfy(topic, `${d.name} is tomorrow ♡`, `Tomorrow is ${d.name}! Make sure you have something planned for Ira.`, 'urgent');
+    } else if (days === 0) {
+      await sendNtfy(topic, `Today is ${d.name} ♡`, `Today is the day — make it special for Ira!`, 'urgent');
+    }
+  }
+}
+
+// ── INIT ──────────────────────────────────────
+refreshHome();
+runScheduler();
+checkDateReminders();
+</script>
+</body>
+</html>
