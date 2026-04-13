@@ -440,6 +440,8 @@
 
   <div id="setup-banner-wrap"></div>
 
+  <div id="date-night-card-wrap"></div>
+
   <div class="nudge-card">
     <div class="nudge-type" id="nudge-type">Today's nudge</div>
     <div class="nudge-text loading" id="nudge-text">Tap below to get a personalized suggestion...</div>
@@ -976,27 +978,48 @@ function refreshHome() {
 }
 
 // ── SCHEDULER ─────────────────────────────────
-// Runs on app open — checks if a nudge should fire today
 async function runScheduler() {
   const topic  = store.get('ntfy_topic');
   const apiKey = store.get('claude_api_key');
   if (!topic || !apiKey) return;
 
-  const now       = Date.now();
-  const lastFired = store.get('last_nudge_sent') || 0;
-  const daysSince = (now - lastFired) / 86400000;
-
-  // Fire 2-3x/week — roughly every 2-3 days with some randomness
-  const threshold = 2 + Math.random(); // 2.0–3.0 days
-  if (daysSince < threshold) return;
+  const now  = Date.now();
+  const hour = new Date().getHours();
+  const day  = new Date().getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 
   store.set('last_schedule_check', now);
 
-  // Random hour between 8am–8pm
-  const hour = new Date().getHours();
-  if (hour < 8 || hour > 20) return;
+  // ── Daily nudge — fire once per day between 8–9am ──
+  const lastNudgeSent = store.get('last_nudge_sent') || 0;
+  const hoursSince    = (now - lastNudgeSent) / 3600000;
+  if (hour >= 8 && hour < 9 && hoursSince > 20) {
+    await sendDailyNudge(topic, apiKey, now);
+  }
 
-  // Generate and send
+  // ── Monday date planning nudge ──
+  if (day === 1 && hour >= 8 && hour < 9) {
+    const lastMondayPlanning = store.get('last_monday_planning') || 0;
+    const weekMs = 7 * 86400000;
+    if (now - lastMondayPlanning > weekMs * 0.9) {
+      store.set('date_plan_made', false);
+      store.set('last_monday_planning', now);
+      await sendNtfy(topic, 'Date night is Thursday ♡', 'Have you planned Thursday\'s date night yet? Open the app to check it off once you have a plan.', 'high');
+    }
+  }
+
+  // ── Wednesday reminder if plan not made ──
+  if (day === 3 && hour >= 8 && hour < 9) {
+    const planMade = store.get('date_plan_made');
+    const lastWedReminder = store.get('last_wed_reminder') || 0;
+    const weekMs = 7 * 86400000;
+    if (!planMade && (now - lastWedReminder > weekMs * 0.9)) {
+      store.set('last_wed_reminder', now);
+      await sendNtfy(topic, 'Thursday date night — still no plan ♡', 'Date night is in 2 days and you haven\'t made a plan yet. Open the app and sort it out!', 'high');
+    }
+  }
+}
+
+async function sendDailyNudge(topic, apiKey, now) {
   const notes = getNotes();
   const notesContext = notes.length
     ? notes.map(n => `${categoryLabels[n.category]}: ${n.text}`).join('\n')
@@ -1008,7 +1031,7 @@ async function runScheduler() {
     .map(d => `${d.name} is in ${getDaysUntil(d.date, d.repeat)} days`)
     .join(', ') || 'None this week';
 
-  const types = ['a small romantic gesture', 'a thoughtful compliment to send her', 'a tiny act of kindness', 'a playful surprise'];
+  const types = ['a small romantic gesture', 'a thoughtful compliment to send her', 'a tiny act of kindness', 'a playful surprise', 'a quality time idea'];
   const type  = types[Math.floor(Math.random() * types.length)];
 
   try {
@@ -1017,7 +1040,7 @@ async function runScheduler() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         apiKey,
-        prompt: `You are helping Andrii show up for his wife Ira.
+        prompt: `You are helping Andrii show up for his wife Ira. They have kids together.
 
 Notes about Ira:
 ${notesContext}
@@ -1036,6 +1059,47 @@ Give Andrii one specific, actionable idea for ${type} he can do today. 2 sentenc
   } catch { /* silent fail */ }
 }
 
+// ── DATE NIGHT CARD ───────────────────────────
+function refreshDateNightCard() {
+  const wrap = document.getElementById('date-night-card-wrap');
+  const day  = new Date().getDay();
+  const planMade = store.get('date_plan_made');
+  const lastMondayPlanning = store.get('last_monday_planning') || 0;
+  const weekMs = 7 * 86400000;
+  const isThisWeek = (Date.now() - lastMondayPlanning) < weekMs;
+
+  // Show card Mon–Thu if plan not yet made this week
+  if ((day >= 1 && day <= 4) && !planMade && isThisWeek) {
+    wrap.innerHTML = `
+      <div class="nudge-card" style="background:linear-gradient(135deg,#1a2e1a 0%,#0e1a0e 100%);border-color:rgba(74,222,128,0.3);margin-bottom:16px;">
+        <div class="nudge-type" style="color:#4ade80;">Thursday date night</div>
+        <div class="nudge-text" style="font-size:18px;">Have you made a plan yet?</div>
+        <button class="btn" style="background:#4ade80;color:#0e1a0e;font-weight:500;" onclick="markPlanMade()">
+          ✓ Plan made
+        </button>
+      </div>`;
+  } else if (planMade && isThisWeek) {
+    wrap.innerHTML = `
+      <div class="card" style="border-color:rgba(74,222,128,0.3);margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="color:#4ade80;font-size:20px;">✓</span>
+          <div>
+            <div style="font-size:14px;font-weight:500;">Date night planned</div>
+            <div style="font-size:12px;color:var(--muted);">Thursday is sorted ♡</div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    wrap.innerHTML = '';
+  }
+}
+
+function markPlanMade() {
+  store.set('date_plan_made', true);
+  refreshDateNightCard();
+  showToast('Nice! Ira is going to love it ♡');
+}
+
 // ── DATE REMINDERS ────────────────────────────
 async function checkDateReminders() {
   const topic = store.get('ntfy_topic');
@@ -1045,7 +1109,6 @@ async function checkDateReminders() {
   const lastDateCheck = store.get('last_date_check') || 0;
   const now = Date.now();
 
-  // Only check once per day
   if (now - lastDateCheck < 86400000) return;
   store.set('last_date_check', now);
 
@@ -1063,8 +1126,8 @@ async function checkDateReminders() {
 
 // ── INIT ──────────────────────────────────────
 refreshHome();
+refreshDateNightCard();
 runScheduler();
-checkDateReminders();
-</script>
+checkDateReminders();</script>
 </body>
 </html>
