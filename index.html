@@ -580,6 +580,13 @@
   </div>
 
   <div class="card">
+    <div class="card-label">Test nudge</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Trigger a nudge right now to make sure everything is working end to end.</p>
+    <button class="btn btn-ghost" onclick="testCronNudge()">Send test nudge now</button>
+    <span id="test-nudge-status" style="font-size:12px;color:var(--muted);margin-left:12px;"></span>
+  </div>
+
+  <div class="card">
     <div class="card-label">Data</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">All data is stored locally on your phone only — nothing is sent to any server except Claude API calls for nudge generation.</p>
     <button class="btn btn-ghost" onclick="exportData()">Export all data</button>
@@ -615,6 +622,32 @@ const store = {
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
 };
 
+// ── Worker URL — update this after deploying cron worker ──
+const WORKER_URL = 'https://royal-field-a19a.andreyrouk.workers.dev/';
+
+// ── KV sync ──────────────────────────────────
+async function syncToKV() {
+  try {
+    await fetch(WORKER_URL + '/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notes: getNotes(),
+        dates: getDates(),
+      }),
+    });
+  } catch { /* silent */ }
+}
+
+async function loadFromKV() {
+  try {
+    const res  = await fetch(WORKER_URL + '/load');
+    const data = await res.json();
+    if (data.notes) saveNotes(data.notes);
+    if (data.dates) saveDates(data.dates);
+  } catch { /* silent */ }
+}
+
 // ── Page navigation ──────────────────────────
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -647,6 +680,7 @@ function addDate() {
   const dates = getDates();
   dates.push({ id: Date.now(), name, date: val, repeat: rep });
   saveDates(dates);
+  syncToKV();
   document.getElementById('date-name').value = '';
   document.getElementById('date-value').value = '';
   renderDates();
@@ -656,6 +690,7 @@ function addDate() {
 
 function deleteDate(id) {
   saveDates(getDates().filter(d => d.id !== id));
+  syncToKV();
   renderDates();
   refreshHome();
 }
@@ -721,6 +756,7 @@ function addNote() {
   const notes = getNotes();
   notes.push({ id: Date.now(), category: cat, text });
   saveNotes(notes);
+  syncToKV();
   document.getElementById('note-text').value = '';
   renderNotes();
   updateStats();
@@ -729,6 +765,7 @@ function addNote() {
 
 function deleteNote(id) {
   saveNotes(getNotes().filter(n => n.id !== id));
+  syncToKV();
   renderNotes();
   updateStats();
 }
@@ -780,6 +817,12 @@ function saveApiKey() {
   const val = document.getElementById('api-key-input').value.trim();
   if (!val || val.startsWith('•')) { showToast('Enter your API key first'); return; }
   store.set('claude_api_key', val);
+  // Sync to KV so cron worker can use it
+  fetch(WORKER_URL + '/savekey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey: val }),
+  }).catch(() => {});
   document.getElementById('api-key-status').textContent = '✓ Key saved';
   document.getElementById('api-key-input').value = '••••••••••••••••';
   showToast('API key saved');
@@ -789,6 +832,12 @@ async function saveNtfy() {
   const topic = document.getElementById('ntfy-topic').value.trim();
   if (!topic) { showToast('Enter a topic name first'); return; }
   store.set('ntfy_topic', topic);
+  // Sync to KV so cron worker can use it
+  fetch(WORKER_URL + '/savekey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ntfyTopic: topic }),
+  }).catch(() => {});
   showToast('Sending test notification...');
   const ok = await sendNtfy(topic, 'For Ira ♡', 'Notifications are working! You\'ll receive your nudges here.', 'high');
   if (ok) {
@@ -882,13 +931,10 @@ Rules:
 Respond with only the suggestion, nothing else.`;
 
   try {
-    const res = await fetch('https://odd-darkness-5c82.andreyrouk.workers.dev/', {
+    const res = await fetch(WORKER_URL + '/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        apiKey,
-        prompt,
-      }),
+      body: JSON.stringify({ apiKey, prompt }),
     });
 
     const data = await res.json();
@@ -1124,10 +1170,26 @@ async function checkDateReminders() {
   }
 }
 
+// ── MANUAL TEST ───────────────────────────────
+async function testCronNudge() {
+  const status = document.getElementById('test-nudge-status');
+  status.textContent = 'Sending...';
+  try {
+    await fetch(WORKER_URL + '/testnudge', { method: 'POST' });
+    status.textContent = '✓ Check your ntfy app!';
+  } catch {
+    status.textContent = 'Failed — check Worker URL in settings';
+  }
+}
+
 // ── INIT ──────────────────────────────────────
 refreshHome();
 refreshDateNightCard();
-runScheduler();
-checkDateReminders();</script>
+checkDateReminders();
+loadFromKV().then(() => {
+  refreshHome();
+  renderDates();
+  renderNotes();
+});</script>
 </body>
 </html>
